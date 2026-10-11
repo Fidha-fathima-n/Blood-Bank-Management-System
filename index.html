@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Bank Management System | Admin Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2226%22>🩸</text></svg>">
+</head>
+<body>
+
+  <!-- ======================================================================
+       1. ADMIN LOGIN OVERLAY (Enforces Donor Privacy & Admin Access)
+       ====================================================================== -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon">🩸</div>
+        <h1>BLOOD BANK MANAGEMENT SYSTEM</h1>
+        <p>Admin-Controlled Portal • OOPS Mini Project</p>
+      </div>
+      <div class="login-body">
+        <div class="privacy-notice">
+          <strong>🔒 Donor Privacy Notice:</strong><br>
+          Donor details are confidential. Only authenticated administrators may access donor records, log donations, and issue blood.
+        </div>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">Administrator Username</label>
+            <input type="text" id="login-username" class="form-control" value="admin" required autofocus>
+          </div>
+          
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" value="admin123" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>Secure Admin Login</span> &rarr;
+          </button>
+        </form>
+        
+        <div class="hint-text">
+          Default Credentials: <strong>admin</strong> / <strong>admin123</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       2. MAIN APPLICATION CONTAINER (Visible after Authentication)
+       ====================================================================== -->
+  <div id="app-container" class="app-container" style="display: none;">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">🩸</div>
+        <div>
+          <h2>BBMS PORTAL</h2>
+          <span>College of Engg. Muttathara</span>
+        </div>
+      </div>
+      
+      <ul class="sidebar-menu">
+        <li>
+          <a class="nav-link active" data-view="dashboard">
+            <span class="icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" data-view="donors">
+            <span class="icon">👥</span>
+            <span>Manage Donors</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" data-view="donations">
+            <span class="icon">🩸</span>
+            <span>Record Donation</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" data-view="inventory">
+            <span class="icon">📦</span>
+            <span>Blood Inventory</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" data-view="issue">
+            <span class="icon">🏥</span>
+            <span>Issue Blood</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" data-view="reports">
+            <span class="icon">📑</span>
+            <span>System Reports</span>
+          </a>
+        </li>
+      </ul>
+      
+      <div class="sidebar-footer">
+        <div>Java OOPS Web Edition</div>
+        <div>MySQL JDBC Connected</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h3 id="topbar-page-title">Dashboard Overview</h3>
+          <span class="system-badge">Admin Controlled • No Patient Login</span>
+        </div>
+        
+        <div class="topbar-right">
+          <div class="admin-profile">
+            <div class="admin-avatar" id="admin-avatar">A</div>
+            <div class="admin-details">
+              <div class="admin-name" id="admin-display-name">Administrator</div>
+              <div class="admin-role" id="admin-display-role">Super Administrator</div>
+            </div>
+          </div>
+          
+          <button id="btn-logout" class="btn btn-secondary btn-sm" title="Log out">
+            <span>🚪 Logout</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Area -->
+      <main class="content-area">
+
+        <!-- ================================================================
+             VIEW 1: DASHBOARD
+             ================================================================ -->
+        <section id="view-dashboard" class="page-view active">
+          <div class="page-header">
+            <div>
+              <h2>Operational Dashboard</h2>
+              <p>Real-time visibility into donor network and live blood inventory.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="app.refreshAllData()">
+              🔄 Refresh Overview
+            </button>
+          <!-- Presentation Credits Banner (College Presentation Slide 1) -->
+          <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: var(--shadow-sm);">
+            <div>
+              <span style="font-weight: 700; color: var(--primary-red); font-size: 13px;">🎓 COLLEGE OF ENGINEERING MUTTATHARA • JAVA OOPS PROJECT</span>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                Team: <strong>Aparnna VK</strong> | <strong>Aswin R</strong> | <strong>Farhana SJ</strong> | <strong>Fidha Fathima N</strong>
+              </div>
+            </div>
+            <span class="system-badge">Admin-Controlled BBMS</span>
+          </div>
+
+          <!-- Low Stock Alert Banner (Slide 19) -->
+          <div id="low-stock-alert-banner" style="display:none; margin-bottom: 20px; background: var(--status-danger-bg); border-left: 4px solid var(--accent-red); padding: 14px 18px; border-radius: var(--radius-sm); color: var(--status-danger-text); box-shadow: var(--shadow-sm);">
+            <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <span>⚠️ Critical &amp; Low Blood Stock Alert</span>
+            </div>
+            <div id="low-stock-alert-message" style="font-size: 13px; margin-top: 4px;"></div>
+          </div>
+
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card blue">
+              <div>
+                <div class="kpi-title">Registered Donors</div>
+                <div class="kpi-value" id="kpi-donors">0</div>
+              </div>
+              <div class="kpi-icon">👥</div>
+            </div>
+            
+            <div class="kpi-card red">
+              <div>
+                <div class="kpi-title">Blood Units in Stock</div>
+                <div class="kpi-value" id="kpi-stock">0 units</div>
+              </div>
+              <div class="kpi-icon">🩸</div>
+            </div>
+            
+            <div class="kpi-card green">
+              <div>
+                <div class="kpi-title">Donations Recorded</div>
+                <div class="kpi-value" id="kpi-donations">0</div>
+              </div>
+              <div class="kpi-icon">💉</div>
+            </div>
+            
+            <div class="kpi-card orange">
+              <div>
+                <div class="kpi-title">Blood Units Issued</div>
+                <div class="kpi-value" id="kpi-issued">0 units</div>
+              </div>
+              <div class="kpi-icon">🏥</div>
+            </div>
+          </div>
+
+          <!-- Live Stock Cards Grid (8 Groups) -->
+          <div class="card">
+            <div class="card-title">
+              <span>Live Blood Inventory by Group (8 Standard Groups)</span>
+              <button class="btn btn-secondary btn-sm" onclick="app.switchView('inventory')">Manage Inventory &rarr;</button>
+            </div>
+            <div class="inventory-cards-grid" id="dashboard-stock-grid">
+              <!-- Dynamically populated 8 blood groups -->
+            </div>
+          </div>
+
+          <!-- Quick Shortcuts & Recent Activity -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Quick Administration Actions</div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-secondary" style="justify-content: space-between;" onclick="app.openAddDonorModal()">
+                  <span>➕ Register New Blood Donor</span>
+                  <span>&rarr;</span>
+                </button>
+                <button class="btn btn-secondary" style="justify-content: space-between;" onclick="app.switchView('donations')">
+                  <span>🩸 Record Blood Donation</span>
+                  <span>&rarr;</span>
+                </button>
+                <button class="btn btn-secondary" style="justify-content: space-between;" onclick="app.switchView('issue')">
+                  <span>🏥 Issue Blood to Hospital / Recipient</span>
+                  <span>&rarr;</span>
+                </button>
+                <button class="btn btn-secondary" style="justify-content: space-between;" onclick="app.switchView('reports')">
+                  <span>📑 Generate Executive Audit Report</span>
+                  <span>&rarr;</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Recent Donations Log</div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Donor</th>
+                      <th>Group</th>
+                      <th>Units</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-recent-donations">
+                    <tr><td colspan="4" style="text-align:center;">Loading records...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 2: MANAGE DONORS
+             ================================================================ -->
+        <section id="view-donors" class="page-view">
+          <div class="page-header">
+            <div>
+              <h2>Donor Record Management</h2>
+              <p>Confidential donor records: Only authenticated administrators can access personal data.</p>
+            </div>
+            <button class="btn btn-primary" onclick="app.openAddDonorModal()">
+              ➕ Add / Register Donor
+            </button>
+          </div>
+
+          <div class="card">
+            <!-- Filter & Search Toolbar -->
+            <div class="filter-bar">
+              <div class="filter-group">
+                <label for="donor-blood-filter" style="font-size:13px; font-weight:600;">Filter by Blood Group:</label>
+                <select id="donor-blood-filter" class="form-control" style="width: 140px;" onchange="app.filterDonors()">
+                  <option value="ALL">ALL Groups</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <input type="text" id="donor-search-input" class="form-control" placeholder="Search by name or contact..." style="width: 260px;" oninput="app.filterDonors()">
+              </div>
+            </div>
+
+            <!-- Donors Table -->
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Donor ID</th>
+                    <th>Full Name</th>
+                    <th>Blood Group</th>
+                    <th>Contact Number</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="donors-table-body">
+                  <tr><td colspan="5" style="text-align:center;">Loading donor records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 3: RECORD DONATION
+             ================================================================ -->
+        <section id="view-donations" class="page-view">
+          <div class="page-header">
+            <div>
+              <h2>Record Blood Donation</h2>
+              <p>Donation quantities automatically increment the live blood stock.</p>
+            </div>
+          </div>
+
+          <div class="grid-3-2">
+            <!-- Left: Donation Form -->
+            <div class="card">
+              <div class="card-title">New Donation Entry</div>
+              <form id="record-donation-form">
+                <div class="form-group">
+                  <label for="donation-donor-select">Select Registered Donor</label>
+                  <select id="donation-donor-select" class="form-control" required onchange="app.onDonationDonorChange()">
+                    <option value="">-- Choose a Donor --</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Donor Blood Group</label>
+                  <input type="text" id="donation-blood-group" class="form-control" placeholder="Auto-selected from donor" readonly style="background:#f1f5f9; font-weight:700; color:var(--primary-red);">
+                </div>
+
+                <div class="form-group">
+                  <label for="donation-quantity">Donation Quantity (Units)</label>
+                  <input type="number" id="donation-quantity" class="form-control" value="1" min="1" max="10" required>
+                  <small style="color:var(--text-muted); font-size:11px;">1 unit ≈ 350-450 ml of whole blood</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="donation-date">Donation Date</label>
+                  <input type="date" id="donation-date" class="form-control" required>
+                </div>
+
+                <div class="privacy-notice" style="background:var(--status-success-bg); color:var(--status-success-text); border-color:#16a34a;">
+                  ⚡ <strong>Automatic Stock Sync:</strong> This quantity will immediately increase inventory for the corresponding blood group.
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                  <span>Record Donation</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: Donation History Audit Trail -->
+            <div class="card">
+              <div class="card-title">Donation History & Audit Trail</div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Donation ID</th>
+                      <th>Donor Name</th>
+                      <th>Blood Group</th>
+                      <th>Units</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="donations-history-body">
+                    <tr><td colspan="5" style="text-align:center;">Loading donation logs...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 4: BLOOD INVENTORY
+             ================================================================ -->
+        <section id="view-inventory" class="page-view">
+          <div class="page-header">
+            <div>
+              <h2>Blood Inventory & Stock Control</h2>
+              <p>Live inventory management across 8 standard blood groups with availability checking.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="app.loadInventory()">🔄 Refresh Stock</button>
+          </div>
+
+          <!-- 8 Blood Group Cards -->
+          <div class="inventory-cards-grid" id="inventory-full-cards">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Tools Grid: Availability Checker + Manual Override -->
+          <div class="grid-2">
+            <!-- Tool 1: Availability Checker -->
+            <div class="card">
+              <div class="card-title">🔍 Check Blood Availability</div>
+              <form id="check-availability-form">
+                <div class="form-group">
+                  <label for="check-blood-group">Blood Group</label>
+                  <select id="check-blood-group" class="form-control">
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="check-quantity">Needed Units</label>
+                  <input type="number" id="check-quantity" class="form-control" value="1" min="1" max="100" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                  Check Availability
+                </button>
+              </form>
+
+              <div id="availability-result" style="margin-top: 15px; display: none;"></div>
+            </div>
+
+            <!-- Tool 2: Manual Stock Adjustment -->
+            <div class="card">
+              <div class="card-title">⚙️ Manual Stock Calibration (Admin)</div>
+              <form id="update-stock-form">
+                <div class="form-group">
+                  <label for="update-blood-group">Blood Group</label>
+                  <select id="update-blood-group" class="form-control">
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="update-quantity">New Total Quantity (Units)</label>
+                  <input type="number" id="update-quantity" class="form-control" value="10" min="0" max="500" required>
+                  <small style="color:var(--text-muted); font-size:11px;">Cannot be negative. Enforced by OOP validation.</small>
+                </div>
+
+                <button type="submit" class="btn btn-secondary btn-block">
+                  Set Stock Level
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 5: ISSUE BLOOD
+             ================================================================ -->
+        <section id="view-issue" class="page-view">
+          <div class="page-header">
+            <div>
+              <h2>Issue Blood Units</h2>
+              <p>The system checks availability first and automatically deducts stock upon issue.</p>
+            </div>
+          </div>
+
+          <div class="grid-3-2">
+            <!-- Issue Form -->
+            <div class="card">
+              <div class="card-title">New Blood Issue Request</div>
+              <form id="issue-blood-form">
+                <div class="form-group">
+                  <label for="issue-blood-group">Blood Group Required</label>
+                  <select id="issue-blood-group" class="form-control" onchange="app.updateIssueAvailableBadge()">
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Current Stock Status</label>
+                  <div id="issue-current-stock-badge" style="padding: 10px; border-radius: var(--radius-sm); font-weight:700; font-size:13px; background:var(--status-success-bg); color:var(--status-success-text);">
+                    Available: 0 units
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="issue-quantity">Quantity to Issue (Units)</label>
+                  <input type="number" id="issue-quantity" class="form-control" value="1" min="1" max="50" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="issue-recipient">Recipient / Hospital Reference</label>
+                  <input type="text" id="issue-recipient" class="form-control" placeholder="e.g. City General Hospital ICU" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="issue-date">Issue Date</label>
+                  <input type="date" id="issue-date" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-danger btn-block">
+                  <span>Verify Availability &amp; Issue</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Issue History Audit Table -->
+            <div class="card">
+              <div class="card-title">Blood Issue Audit History</div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Issue ID</th>
+                      <th>Blood Group</th>
+                      <th>Units</th>
+                      <th>Date</th>
+                      <th>Authorized By</th>
+                      <th>Hospital / Recipient</th>
+                    </tr>
+                  </thead>
+                  <tbody id="issues-history-body">
+                    <tr><td colspan="6" style="text-align:center;">Loading issue logs...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 6: SYSTEM REPORTS
+             ================================================================ -->
+        <section id="view-reports" class="page-view">
+          <div class="page-header">
+            <div>
+              <h2>System Reports &amp; Operational Audit</h2>
+              <p>Official administrative summary of donors, live inventory, donations, and issues.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" onclick="app.loadReport()">🔄 Refresh Report</button>
+              <button class="btn btn-secondary" onclick="app.exportReport('txt')">💾 Export Text (.txt)</button>
+              <button class="btn btn-secondary" onclick="app.exportReport('csv')">📊 Export CSV (.csv)</button>
+              <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="report-paper" id="report-view-content">
+              Loading executive report...
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       3. MODALS
+       ====================================================================== -->
+  <!-- Add Donor Modal -->
+  <div id="modal-add-donor" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Register New Donor</h4>
+        <button class="modal-close" onclick="app.closeModal('modal-add-donor')">&times;</button>
+      </div>
+      <form id="add-donor-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="donor-name">Full Name</label>
+            <input type="text" id="donor-name" class="form-control" placeholder="e.g. Rajesh Kumar" required>
+          </div>
+
+          <div class="form-group">
+            <label for="donor-blood-group">Blood Group</label>
+            <select id="donor-blood-group" class="form-control" required>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="donor-contact">Contact Number</label>
+            <input type="tel" id="donor-contact" class="form-control" placeholder="e.g. 9876543210" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-add-donor')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Donor Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Donor Modal -->
+  <div id="modal-edit-donor" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Edit Donor Details</h4>
+        <button class="modal-close" onclick="app.closeModal('modal-edit-donor')">&times;</button>
+      </div>
+      <form id="edit-donor-form">
+        <div class="modal-body">
+          <input type="hidden" id="edit-donor-id">
+
+          <div class="form-group">
+            <label>Donor ID</label>
+            <input type="text" id="edit-donor-id-display" class="form-control" readonly style="background:#f1f5f9;">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-donor-name">Full Name</label>
+            <input type="text" id="edit-donor-name" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-donor-blood-group">Blood Group</label>
+            <select id="edit-donor-blood-group" class="form-control" required>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-donor-contact">Contact Number</label>
+            <input type="tel" id="edit-donor-contact" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-edit-donor')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
