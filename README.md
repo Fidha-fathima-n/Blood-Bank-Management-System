@@ -198,13 +198,4 @@ Open `http://localhost:8080` in your browser.
 
 ---
 
-## 🎓 Viva Voce Q&A Cheat Sheet
 
-- **Q: How does turning this project into a website maintain the original OOP principles?**  
-  *Answer:* The web application uses an embedded Java HTTP server (`WebServer.java`) that communicates directly with our Core Java OOP architecture. The business logic (`Person`, `Donor`, `BloodInventory`, `Donation`, `BloodIssue`), encapsulation, inheritance, polymorphism, and DAOs are all executed on the Java backend.
-
-- **Q: Why is there no Patient module in this website?**  
-  *Answer:* Blood banks distribute blood units directly to certified hospitals, clinics, and emergency trauma centers rather than individual consumer patients. Removing public patient access preserves donor privacy, prevents spam, and ensures all issues are audited by authorized medical administrators.
-
-- **Q: How does the website handle blood stock when blood is issued?**  
-  *Answer:* When a blood issue request is submitted, the system verifies available inventory for that specific blood group first. If the requested quantity exceeds available stock, the request is rejected with a shortage alert. If available, the stock is automatically decremented and the issue is logged in the `Issues` audit trail.
